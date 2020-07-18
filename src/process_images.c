@@ -15,7 +15,7 @@ void process_images(char *datacfg, char *cfgfile, char *weightfile, float thresh
         return;
     }
 
-    image **alphabet = NULL; 
+    image **alphabet = NULL;
     network net = parse_network_cfg_custom(cfgfile, 1, 1); // set batch=1
     if (weightfile) {
         load_weights(&net, weightfile);
@@ -89,11 +89,13 @@ void process_images(char *datacfg, char *cfgfile, char *weightfile, float thresh
         }
         draw_detections_v3(im, dets, nboxes, thresh, names, alphabet, l.classes, ext_output);
 
-        
+
         {
             char * file_name = basename(input);
 
             char * last_dot = strrchr(file_name, '.');
+
+            char old_dot = *last_dot;
 
             if(last_dot)
             {
@@ -108,9 +110,11 @@ void process_images(char *datacfg, char *cfgfile, char *weightfile, float thresh
             else
             {
                 printf("Cannot construct path for dirname: %s and basename: %s\n\n", dir_name, file_name);
-            }           
+            }
+
+            *last_dot = old_dot;
         }
-       
+
 
         if (!dont_show) {
             show_image(im, "predictions");
