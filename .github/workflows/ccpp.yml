@@ -1,61 +1,65 @@
-name: Darknet Continuous Integration
+name: YOLO autobuild
 
 on: 
-  workflow_dispatch:
-    inputs:
-      cuda-version:
-        description: 'CUDA version for Linux build. For example: 10.1, 10.2. This parameter has no effect for Windows.'
-        required: true
-        default: '10.2'
+  push:
+    branches:
+      - yolov4-ench
+      - dev
+  pull_request:
+    branches:
+      - yolov4-ench
+      - dev
 
 jobs:
   ubuntu-cuda:
     runs-on: ubuntu-18.04
-    container: nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
     env:
-      CMAKE_INSTALL_DIR: /home/cmake
+        CUDACXX: "/usr/local/cuda-10.2/bin/nvcc"
+        CUDA_PATH: "/usr/local/cuda-10.2"
+        CUDA_TOOLKIT_ROOT_DIR: "/usr/local/cuda-10.2"
+        LD_LIBRARY_PATH: "/usr/local/cuda-10.2/lib64:/usr/local/cuda-10.2/lib64/stubs:$LD_LIBRARY_PATH"
     steps:
-    - name: Checkout 
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
 
-    - name: LS
-      run: echo $LD_LIBRARY_PATH
-
-    - name: Install CMake
-      run: |
-        apt update && DEBIAN_FRONTEND=noninteractive apt install  -y wget
-        wget https://github.com/Kitware/CMake/releases/download/v3.17.3/cmake-3.17.3-Linux-x86_64.sh -q -O ./cmake-install.sh 
-        chmod u+x ./cmake-install.sh
-        mkdir "$CMAKE_INSTALL_DIR"
-        ./cmake-install.sh --skip-license --prefix="$CMAKE_INSTALL_DIR"
-        rm ./cmake-install.sh
-
+    - name: Update apt
+      run: sudo apt update
     - name: Install OpenCV
-      run: DEBIAN_FRONTEND=noninteractive apt install -y libopencv-dev
+      run: sudo apt install libopencv-dev
+
+    - uses: lukka/get-cmake@v3.17.3
+
+    - name: 'Install CUDA'
+      run: |
+        wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
+        sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+        sudo dpkg -i cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
+        wget http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/nvidia-machine-learning-repo-ubuntu1804_1.0.0-1_amd64.deb
+        sudo dpkg -i nvidia-machine-learning-repo-ubuntu1804_1.0.0-1_amd64.deb
+        sudo apt update
+        sudo apt-get install -y --no-install-recommends cuda-compiler-10-2 cuda-libraries-dev-10-2 cuda-driver-dev-10-2 cuda-cudart-dev-10-2 cuda-curand-dev-10-2
+        sudo apt-get install -y --no-install-recommends libcudnn7-dev
+        sudo ln -s /usr/local/cuda-10.2/lib64/stubs/libcuda.so /usr/local/cuda-10.2/lib64/stubs/libcuda.so.1
 
     - name: Build yolo
-      run: |
-        LD_LIBRARY_PATH="/usr/local/nvidia/lib64/stubs:$LD_LIBRARY_PATH"
-        PATH=$PATH:"$CMAKE_INSTALL_DIR"/bin
-        ./build.sh
+      run: ./build.sh
 
-  # ubuntu-cpu:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v2
+  ubuntu-cpu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
 
-  #   - name: Update apt
-  #     run: sudo apt update
-  #   - name: Install OpenCV
-  #     run: sudo apt install libopencv-dev
+    - name: Update apt
+      run: sudo apt update
+    - name: Install OpenCV
+      run: sudo apt install libopencv-dev
 
-  #   - name: 'Build with CMake and Ninja'
-  #     uses: lukka/run-cmake@v2
-  #     with:
-  #       cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-  #       cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-  #       useVcpkgToolchainFile: false
-  #       buildDirectory: '${{ runner.workspace }}/buildDirectory'
-  #       cmakeAppendedArgs: "-DCMAKE_BUILD_TYPE=Release"
-  #       cmakeBuildType: 'Release'
-  #       buildWithCMakeArgs: '--target install --parallel 2'
+    - name: 'Build with CMake and Ninja'
+      uses: lukka/run-cmake@v2
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+        useVcpkgToolchainFile: false
+        buildDirectory: '${{ runner.workspace }}/buildDirectory'
+        cmakeAppendedArgs: "-DCMAKE_BUILD_TYPE=Release"
+        cmakeBuildType: 'Release'
+        buildWithCMakeArgs: '--target install --parallel 2'
