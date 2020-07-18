@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-number_of_build_workers=8
-bypass_vcpkg=true
+number_of_build_workers=$(nproc --all)
+bypass_vcpkg=false
 force_cpp_build=false
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -34,6 +34,7 @@ then
   additional_build_setup="-DBUILD_AS_CPP:BOOL=TRUE"
 fi
 
+
 ## DEBUG
 #mkdir -p build_debug
 #cd build_debug
@@ -49,8 +50,7 @@ fi
 mkdir -p build_release
 cd build_release
 cmake .. -DCMAKE_BUILD_TYPE=Release ${vcpkg_define} ${vcpkg_triplet_define} ${additional_defines} ${additional_build_setup}
-cmake --build . --target install -- -j${number_of_build_workers}
-#cmake --build . --target install --parallel ${number_of_build_workers}  #valid only for CMake 3.12+
+cmake --build . --target install --parallel ${number_of_build_workers}  #valid only for CMake 3.12+
 rm -f DarknetConfig.cmake
 rm -f DarknetConfigVersion.cmake
 cd ..
