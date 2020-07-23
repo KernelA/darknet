@@ -1965,6 +1965,8 @@ void run_detector(int argc, char **argv)
     int ext_output = find_arg(argc, argv, "-ext_output");
     int save_labels = find_arg(argc, argv, "-save_labels");
     char* chart_path = find_char_arg(argc, argv, "-chart", 0);
+    char* input_dir = find_char_arg(argc, argv, "-image_dir", NULL);
+
     if (argc < 4) {
         fprintf(stderr, "usage: %s %s [train/test/valid/demo/map/inference] [data] [cfg] [weights (optional)]\n", argv[0], argv[1]);
         return;
@@ -2008,7 +2010,14 @@ void run_detector(int argc, char **argv)
     else if (0 == strcmp(argv[2], "recall")) validate_detector_recall(datacfg, cfg, weights);
     else if (0 == strcmp(argv[2], "map")) validate_detector_map(datacfg, cfg, weights, thresh, iou_thresh, map_points, letter_box, NULL);
     else if (0 == strcmp(argv[2], "calc_anchors")) calc_anchors(datacfg, num_of_clusters, width, height, show);
-    else if (0 == strcmp(argv[2], "inference")) process_images(datacfg, cfg, weights, thresh, hier_thresh, dont_show, ext_output, save_labels, outfile, letter_box, benchmark_layers);
+    else if (0 == strcmp(argv[2], "inference"))
+    {
+        if(input_dir == NULL)
+        {
+            printf(" You need to set path to input directory: -image_idr");
+        }
+        process_images(datacfg, cfg, weights, input_dir, thresh, hier_thresh, dont_show, ext_output, save_labels, outfile, letter_box, benchmark_layers);
+    }
     else if (0 == strcmp(argv[2], "draw")) {
         int it_num = 100;
         draw_object(datacfg, cfg, weights, filename, thresh, dont_show, it_num, letter_box, benchmark_layers);
