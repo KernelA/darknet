@@ -218,17 +218,20 @@ void process_images(char *datacfg, char *cfgfile, char *weightfile, const char *
     free_list_contents_kvp(options);
     free_list(options);
 
-    int i;
-    const int nsize = 8;
-    for (j = 0; j < nsize; ++j)
+    if(alphabet != NULL)
     {
-        for (i = 32; i < 127; ++i)
+        int i;
+        const int nsize = 8;
+        for (j = 0; j < nsize; ++j)
         {
-            free_image(alphabet[j][i]);
+            for (i = 32; i < 127; ++i)
+            {
+                free_image(alphabet[j][i]);
+            }
+            free(alphabet[j]);
         }
-        free(alphabet[j]);
+        free(alphabet);
     }
-    free(alphabet);
 
     free_network(net);
 }
