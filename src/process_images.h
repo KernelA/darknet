@@ -14,6 +14,7 @@
 #include <dirent.h>
 #include <locale.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 
 #ifdef __cplusplus
@@ -22,7 +23,10 @@ extern "C" {
 
 void strlower(char * str);
 
-void process_images(char *datacfg, char *cfgfile, char *weightfile, const char * path_to_dir, float thresh,
+void process_images_in_dir(char *datacfg, char *cfgfile, char *weightfile, const char * path_to_dir, float thresh,
+    float hier_thresh, int dont_show, int ext_output, int save_labels, char *outfile, int letter_box, int benchmark_layers);
+
+void process_image(char *datacfg, char *cfgfile, char *weightfile, const char * path_to_image, float thresh,
     float hier_thresh, int dont_show, int ext_output, int save_labels, char *outfile, int letter_box, int benchmark_layers);
 
 #endif
