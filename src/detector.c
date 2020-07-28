@@ -1965,7 +1965,7 @@ void run_detector(int argc, char **argv)
     int ext_output = find_arg(argc, argv, "-ext_output");
     int save_labels = find_arg(argc, argv, "-save_labels");
     char* chart_path = find_char_arg(argc, argv, "-chart", 0);
-    char* input_dir = find_char_arg(argc, argv, "-image_dir", NULL);
+    char* input_path = find_char_arg(argc, argv, "-input", NULL);
 
     if (argc < 4) {
         fprintf(stderr, "usage: %s %s [train/test/valid/demo/map/inference] [data] [cfg] [weights (optional)]\n", argv[0], argv[1]);
@@ -2012,11 +2012,32 @@ void run_detector(int argc, char **argv)
     else if (0 == strcmp(argv[2], "calc_anchors")) calc_anchors(datacfg, num_of_clusters, width, height, show);
     else if (0 == strcmp(argv[2], "inference"))
     {
-        if(input_dir == NULL)
+        if(input_path == NULL)
         {
-            printf(" You need to set path to input directory: -image_idr");
+            printf(" You need to set path to input entry: -input");
         }
-        process_images(datacfg, cfg, weights, input_dir, thresh, hier_thresh, dont_show, ext_output, save_labels, outfile, letter_box, benchmark_layers);
+        else
+        {
+            struct stat sb;
+
+            if (stat(input_path, &sb) == 0)
+            {
+                if(S_ISDIR(sb.st_mode))
+                {
+                    process_images_in_dir(datacfg, cfg, weights, input_path, thresh, hier_thresh, dont_show, ext_output, save_labels, outfile, letter_box, benchmark_layers);
+                }
+                else if(S_ISREG(sb.st_mode))
+                {
+                    process_image(datacfg, cfg, weights, input_path, thresh, hier_thresh, dont_show, ext_output, save_labels, outfile, letter_box, benchmark_layers);
+                }
+                else
+                {
+                   printf("Input is not a directory or regular file.");
+                }
+
+            }
+        }
+
     }
     else if (0 == strcmp(argv[2], "draw")) {
         int it_num = 100;
