@@ -216,11 +216,7 @@ void process_images_in_dir(char *datacfg, char *cfgfile, char *weightfile, const
     free_list_contents_kvp(options);
     free_list(options);
 
-<<<<<<< Updated upstream
-    if(alphabet != NULL)
-=======
     if (alphabet != NULL)
->>>>>>> Stashed changes
     {
         int i;
         const int nsize = 8;
@@ -231,8 +227,6 @@ void process_images_in_dir(char *datacfg, char *cfgfile, char *weightfile, const
                 free_image(alphabet[j][i]);
             }
             free(alphabet[j]);
-<<<<<<< Updated upstream
-=======
         }
         free(alphabet);
     }
@@ -445,7 +439,6 @@ free_resources:
                 free_image(alphabet[j][i]);
             }
             free(alphabet[j]);
->>>>>>> Stashed changes
         }
         free(alphabet);
     }
