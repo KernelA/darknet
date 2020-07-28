@@ -284,9 +284,6 @@ void process_image(char *datacfg, char *cfgfile, char *weightfile, const char *p
     int j;
     float nms = .45; // 0.4F
 
-    const int buffer_size = 4096;
-    char new_name_buffer[buffer_size];
-
     char * copy_image = (char*)malloc(sizeof(char) * strlen(path_to_image));
 
     if(copy_image == NULL)
@@ -320,10 +317,9 @@ void process_image(char *datacfg, char *cfgfile, char *weightfile, const char *p
             free(extension);
             extension = NULL;
 
-            sprintf(new_name_buffer, "%s/%s", path_to_image, file_name);
-            printf("Read: %s\n", new_name_buffer);
+            printf("Read: %s\n", path_to_image);
 
-            image im = load_image(new_name_buffer, 0, 0, net.c);
+            image im = load_image((char*)path_to_image, 0, 0, net.c);
             image sized;
 
             if (letter_box)
