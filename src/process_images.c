@@ -295,8 +295,6 @@ void process_image(char *datacfg, char *cfgfile, char *weightfile, const char *p
     strcpy(copy_image, path_to_image);
 
     char *file_name = basename(copy_image);
-    free(copy_image);
-    copy_image = NULL;
     char *last_dot = strrchr(file_name, '.');
 
     if (last_dot)
@@ -418,6 +416,9 @@ free_resources:
         fclose(json_file);
         printf("Save all predictions to %s\n", outfile);
     }
+
+    free(copy_image);
+    copy_image = NULL;
 
     // free memory
     free_ptrs((void **)names, net.layers[net.n - 1].classes);
